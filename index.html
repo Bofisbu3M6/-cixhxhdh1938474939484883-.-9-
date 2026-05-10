@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SPERNEW — Game Optimizer</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== KEY SCREEN ===== -->
+  <div id="key-screen">
+    <div class="ks-bg"></div>
+    <div class="ks-content">
+      <div class="ks-logo">SPERNEW</div>
+      <div class="ks-tagline">Game Optimizer Pro</div>
+      <div class="ks-version">v2.8.1</div>
+      <div class="ks-box">
+        <div class="ks-title">🔑 Nhập Key Kích Hoạt</div>
+        <div class="ks-input-wrap">
+          <input id="keyInput" class="ks-input" type="password" placeholder="Nhập key của bạn..." autocomplete="off" onkeydown="if(event.key==='Enter')activateKey()">
+          <button class="ks-eye" onclick="toggleKeyVis()">👁</button>
+        </div>
+        <button class="ks-btn" onclick="activateKey()">KÍCH HOẠT</button>
+        <div class="ks-error" id="keyError"></div>
+      </div>
+      <div class="ks-demo">
+        Demo: <span onclick="fillKey('NORMAL-DEMO-2024')">NORMAL-DEMO-2024</span> |
+        <span onclick="fillKey('VIP-DEMO-2024')">VIP-DEMO-2024</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TOAST CONTAINER ===== -->
+  <div id="toast-container"></div>
+
+  <!-- ===== VIP BAR ===== -->
+  <div id="vip-bar">
+    <span class="vip-crown">👑</span>
+    <span id="vip-bar-text">VIP ACTIVE | Hết hạn: 2028-12-21</span>
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header id="header">
+    <div class="header-logo">SPERNEW</div>
+    <div class="header-right">
+      <button class="btn-free" id="keyTypeBadge">FREE</button>
+      <div class="status-dot">
+        <div class="dot" id="statusDot"></div>
+        <span id="statusText">ACTIVE</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== CONTENT ===== -->
+  <div id="content">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div id="user-key-info" class="info-chip" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        <span id="keyInfoText"></span>
+      </div>
+
+      <div class="optimizer-banner">
+        <div class="opt-text">
+          <div class="opt-title">SYSTEM</div>
+          <div class="opt-sub">OPTIMIZER</div>
+          <div class="opt-desc">AI-Powered · Tối ưu hóa theo thiết bị thực tế</div>
+          <div class="device-info" id="deviceLabel"></div>
+        </div>
+        <button class="btn-boost" id="boostBtn" onclick="doBoost()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.09 12.37A1 1 0 0 0 5 14h6l-2 8 8.91-10.37A1 1 0 0 0 17 10h-6l2-8z"/></svg>
+          <span>BOOST NOW</span>
+        </button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">FPS</div>
+          <div class="stat-value cyan" id="fpsStat">—</div>
+          <div class="stat-sub" id="fpsStatus">—</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="fpsBar" style="background:var(--cyan)"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">CPU</div>
+          <div class="stat-value green" id="cpuStat">—</div>
+          <div class="stat-sub" id="cpuStatus">—</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="cpuBar" style="background:var(--green)"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">RAM</div>
+          <div class="stat-value green" id="ramStat">—</div>
+          <div class="stat-sub" id="ramStatus">—</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="ramBar" style="background:var(--green)"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">TEMP</div>
+          <div class="stat-value orange" id="tempStat">—</div>
+          <div class="stat-sub" id="tempStatus">—</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="tempBar" style="background:var(--orange)"></div></div>
+        </div>
+      </div>
+
+      <div class="perf-card">
+        <div class="perf-left">
+          <div class="perf-label">PERFORMANCE SCORE</div>
+          <div class="perf-score" id="perfScore">—</div>
+          <div class="perf-status" id="perfStatus">Đang đo...</div>
+        </div>
+        <div class="perf-ring">
+          <svg width="86" height="86" viewBox="0 0 86 86">
+            <circle cx="43" cy="43" r="36" fill="none" stroke="#1e2d40" stroke-width="8"/>
+            <circle id="perfRingEl" cx="43" cy="43" r="36" fill="none" stroke="url(#pgrd)" stroke-width="8"
+              stroke-linecap="round" stroke-dasharray="226.2" stroke-dashoffset="226.2"/>
+            <defs>
+              <linearGradient id="pgrd" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#ff453a"/>
+                <stop offset="50%" stop-color="#ff9f0a"/>
+                <stop offset="100%" stop-color="#00e5ff"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      </div>
+
+      <div class="qa-section">
+        <div class="qa-title">QUICK ACTIONS / HÀNH ĐỘNG NHANH</div>
+        <div class="qa-grid">
+          <button class="qa-btn" onclick="qaAction('ram')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            <span>Clear RAM</span>
+          </button>
+          <button class="qa-btn" onclick="qaAction('cool')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M4.93 4.93l14.14 14.14M2 12h20M4.93 19.07l14.14-14.14"/></svg>
+            <span>Cool Down</span>
+          </button>
+          <button class="qa-btn" onclick="qaAction('fps')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.09 12.37A1 1 0 0 0 5 14h6l-2 8 8.91-10.37A1 1 0 0 0 17 10h-6l2-8z"/></svg>
+            <span>FPS Boost</span>
+          </button>
+          <button class="qa-btn" onclick="qaAction('net')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1.42 9a16 16 0 0 1 21.16 0M5 12.55a11 11 0 0 1 14.08 0M10.73 15.5a6 6 0 0 1 2.54 0M12 19h.01"/></svg>
+            <span>Net Fix</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="net-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span id="netBarText">Network optimized — ping reduced</span>
+      </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="page" id="page-features">
+      <div class="card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          FEATURES — TÍNH NĂNG
+        </div>
+        <div id="features-list"></div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="page" id="page-stats">
+      <div class="stats-hd">
+        <h2>📊 Thống Kê Hệ Thống</h2>
+        <p id="deviceInfoStats">Đang phát hiện thiết bị...</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Hiệu suất thiết bị</div>
+        <div class="srow"><span class="sl">FPS trung bình</span><span class="sv cyan" id="s-fps">—</span></div>
+        <div class="srow"><span class="sl">CPU sử dụng</span><span class="sv" id="s-cpu">—</span></div>
+        <div class="srow"><span class="sl">RAM sử dụng</span><span class="sv" id="s-ram">—</span></div>
+        <div class="srow"><span class="sl">RAM thiết bị</span><span class="sv cyan" id="s-totram">—</span></div>
+        <div class="srow"><span class="sl">CPU cores</span><span class="sv" id="s-cores">—</span></div>
+        <div class="srow"><span class="sl">Nhiệt độ CPU</span><span class="sv" id="s-temp">—</span></div>
+        <div class="srow"><span class="sl">Performance Score</span><span class="sv cyan" id="s-score">—</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Mạng</div>
+        <div class="srow"><span class="sl">Ping hiện tại</span><span class="sv green" id="s-ping">—</span></div>
+        <div class="srow"><span class="sl">Tải xuống</span><span class="sv" id="s-dl">—</span></div>
+        <div class="srow"><span class="sl">Tải lên</span><span class="sv" id="s-ul">—</span></div>
+        <div class="srow"><span class="sl">Packet loss</span><span class="sv green">0%</span></div>
+        <div class="srow"><span class="sl">Loại kết nối</span><span class="sv" id="s-conn">—</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Lịch sử boost</div>
+        <div class="srow"><span class="sl">Lần boost hôm nay</span><span class="sv" id="s-boosts">0</span></div>
+        <div class="srow"><span class="sl">RAM đã giải phóng</span><span class="sv green" id="s-ramcleared">0 MB</span></div>
+        <div class="srow"><span class="sl">FPS cải thiện</span><span class="sv cyan" id="s-fpsgain">+0</span></div>
+        <div class="srow"><span class="sl">Tính năng đang bật</span><span class="sv" id="s-feat">0</span></div>
+      </div>
+    </div>
+
+    <!-- VIP -->
+    <div class="page" id="page-vip">
+      <div class="vip-hero">
+        <div class="vip-crown-big">👑</div>
+        <div class="vip-title">VIP MEMBER</div>
+        <div class="vip-sub">Mở khóa toàn bộ tính năng cao cấp</div>
+        <div class="vip-expiry" id="vipExpiry">Hết hạn: —</div>
+      </div>
+      <div class="vip-plan">
+        <div class="plan-name">🔓 Gói Normal</div>
+        <div class="plan-price">Miễn phí <span>/ 7 ngày</span></div>
+        <ul class="plan-feat"><li>FPS Booster cơ bản</li><li>Network Booster</li><li>Battery Saver</li><li>System Optimizer</li></ul>
+        <button class="btn-buy inactive">ĐANG DÙNG</button>
+      </div>
+      <div class="vip-plan featured">
+        <div class="plan-name">⭐ Gói VIP</div>
+        <div class="plan-price">99.000đ <span>/ tháng</span></div>
+        <ul class="plan-feat"><li>Tất cả tính năng Normal</li><li>Aim Assist nâng cao</li><li>Anti Recoil</li><li>Head Tracking</li><li>Scope Optimizer</li><li>AIM LAB đầy đủ</li></ul>
+        <button class="btn-buy">NÂNG CẤP VIP</button>
+      </div>
+      <div class="vip-plan" style="border-color:rgba(255,69,58,.3)">
+        <div class="plan-name">🔥 Gói Admin</div>
+        <div class="plan-price">Liên hệ <span>/ lifetime</span></div>
+        <ul class="plan-feat"><li>Tất cả tính năng VIP</li><li>Quản lý key người dùng</li><li>Tạo & xóa key tùy ý</li><li>Admin Panel đầy đủ</li></ul>
+        <button class="btn-buy" style="background:linear-gradient(135deg,#3d0000,#7c0000);color:var(--red)">LIÊN HỆ ADMIN</button>
+      </div>
+    </div>
+
+    <!-- AIM LAB -->
+    <div class="page" id="page-aimlab">
+      <!-- Aim Assist -->
+      <div class="card">
+        <div class="sec-hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+          <div><h3>Aim Assist — <em>Hỗ trợ ngắm</em></h3></div>
+        </div>
+        <div class="set-row">
+          <div><div class="set-lbl">Aim Assist</div><div class="set-desc">Kéo tầm tự nhiên khi ngắm</div></div>
+          <button class="toggle on" id="tgl-aimassist" onclick="featureToggle('aimassist',this)"></button>
+        </div>
+        <div class="set-row col">
+          <div class="set-desc">Phạm vi hỗ trợ</div>
+          <div class="btn-grp" id="grp-range">
+            <button class="bopt active" onclick="selOpt(this,'range')">Thấp</button>
+            <button class="bopt" onclick="selOpt(this,'range')">Trung</button>
+            <button class="bopt" onclick="selOpt(this,'range')">Cao</button>
+          </div>
+        </div>
+        <div class="set-row col">
+          <div class="set-desc">Ưu tiên mục tiêu</div>
+          <div class="btn-grp" id="grp-priority">
+            <button class="bopt" onclick="selOpt(this,'priority')">Đầu</button>
+            <button class="bopt active" onclick="selOpt(this,'priority')">Ngực</button>
+            <button class="bopt" onclick="selOpt(this,'priority')">Auto</button>
+          </div>
+        </div>
+        <div class="set-row col">
+          <div class="set-desc">Kích hoạt khi</div>
+          <div class="btn-grp" id="grp-activate">
+            <button class="bopt active" onclick="selOpt(this,'activate')">ADS</button>
+            <button class="bopt" onclick="selOpt(this,'activate')">Luôn</button>
+            <button class="bopt" onclick="selOpt(this,'activate')">Scope</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aim Hold -->
+      <div class="card">
+        <div class="sec-hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          <div><h3>Aim Hold — <em>Giữ tầm</em></h3></div>
+        </div>
+        <div class="set-row">
+          <div><div class="set-lbl">Aim Hold Mode</div><div class="set-desc">Giữ tầm ổn định khi bắn liên tục</div></div>
+          <button class="toggle on" id="tgl-aimhold" onclick="featureToggle('aimhold',this)"></button>
+        </div>
+        <div class="sldr-row">
+          <div class="sldr-hd"><span class="sldr-nm">Độ giữ (Hold strength)</span><span class="sldr-vl" id="holdVal">70</span></div>
+          <input type="range" class="slider" min="0" max="100" value="70" oninput="updateSlider(this,'holdVal')">
+        </div>
+        <div class="set-row col">
+          <div class="set-desc">Chế độ giữ:</div>
+          <div class="btn-grp">
+            <button class="bopt active" onclick="selOpt(this,'holdmode')">Nhấn giữ</button>
+            <button class="bopt" onclick="selOpt(this,'holdmode')">Bắt/Tắt</button>
+            <button class="bopt" onclick="selOpt(this,'holdmode')">Tự động</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Anti Recoil -->
+      <div class="card">
+        <div class="sec-hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <div><h3>Anti Recoil — <em>Chống giật</em></h3></div>
+        </div>
+        <div class="set-row">
+          <div><div class="set-lbl">Anti Recoil</div><div class="set-desc">Giảm độ giật khi bắn liên tục</div></div>
+          <button class="toggle" id="tgl-antirecoil" onclick="featureToggle('antirecoil',this)"></button>
+        </div>
+        <div class="sldr-row">
+          <div class="sldr-hd"><span class="sldr-nm">Mức giảm giật</span><span class="sldr-vl" id="recoilVal">60</span></div>
+          <input type="range" class="slider" min="0" max="100" value="60" oninput="updateSlider(this,'recoilVal')">
+        </div>
+        <div class="set-row col">
+          <div class="set-desc">Loại súng áp dụng</div>
+          <div class="btn-grp">
+            <button class="bopt active" onclick="selOpt(this,'gun')">Tất cả</button>
+            <button class="bopt" onclick="selOpt(this,'gun')">AR</button>
+            <button class="bopt" onclick="selOpt(this,'gun')">SMG</button>
+            <button class="bopt" onclick="selOpt(this,'gun')">Sniper</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sensitivity -->
+      <div class="card">
+        <div class="sec-hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+          <div><h3>Nhạy — <em>Sensitivity Tuning</em></h3></div>
+        </div>
+        <div class="set-row">
+          <div><div class="set-lbl">Sensitivity Tuning</div><div class="set-desc">Tối ưu độ nhạy theo phong cách chơi</div></div>
+          <button class="toggle on" id="tgl-sensitivity" onclick="featureToggle('sensitivity',this)"></button>
+        </div>
+        <div class="preset-grid">
+          <button class="preset-btn active" onclick="selectPreset(this,0)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <div class="pr-nm">Cân bằng</div><div class="pr-sb">Balanced</div>
+          </button>
+          <button class="preset-btn" onclick="selectPreset(this,1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+            <div class="pr-nm">Sniper</div><div class="pr-sb">1 giải</div>
+          </button>
+          <button class="preset-btn" onclick="selectPreset(this,2)">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.09 12.37A1 1 0 0 0 5 14h6l-2 8 8.91-10.37A1 1 0 0 0 17 10h-6l2-8z"/></svg>
+            <div class="pr-nm">Rush</div><div class="pr-sb">Phản xạ nhanh</div>
+          </button>
+          <button class="preset-btn" onclick="selectPreset(this,3)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <div class="pr-nm">Pro</div><div class="pr-sb">Kéo tầm chuẩn</div>
+          </button>
+        </div>
+        <div class="sldr-row"><div class="sldr-hd"><span class="sldr-nm">Tổng quát</span><span class="sldr-vl" id="sv1">100</span></div><input type="range" class="slider" id="sl1" min="0" max="200" value="100" oninput="updateSlider(this,'sv1')"></div>
+        <div class="sldr-row"><div class="sldr-hd"><span class="sldr-nm">ADS</span><span class="sldr-vl" id="sv2">80</span></div><input type="range" class="slider" id="sl2" min="0" max="200" value="80" oninput="updateSlider(this,'sv2')"></div>
+        <div class="sldr-row"><div class="sldr-hd"><span class="sldr-nm">Scope 2x</span><span class="sldr-vl" id="sv3">70</span></div><input type="range" class="slider" id="sl3" min="0" max="200" value="70" oninput="updateSlider(this,'sv3')"></div>
+        <div class="sldr-row"><div class="sldr-hd"><span class="sldr-nm">Scope 4x</span><span class="sldr-vl" id="sv4">55</span></div><input type="range" class="slider" id="sl4" min="0" max="200" value="55" oninput="updateSlider(this,'sv4')"></div>
+        <div class="sldr-row"><div class="sldr-hd"><span class="sldr-nm">Scope 8x</span><span class="sldr-vl" id="sv5">40</span></div><input type="range" class="slider" id="sl5" min="0" max="200" value="40" oninput="updateSlider(this,'sv5')"></div>
+      </div>
+
+      <!-- Head Tracking -->
+      <div class="card">
+        <div class="sec-hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+          <div><h3>Bám đầu — <em>Head Tracking</em></h3></div>
+        </div>
+        <div class="set-row">
+          <div><div class="set-lbl">Head Tracking</div><div class="set-desc">Khóa tầm vào đầu đối thủ tự động</div></div>
+          <button class="toggle" id="tgl-headtracking" onclick="featureToggle('headtracking',this)"></button>
+        </div>
+        <div class="sldr-row">
+          <div class="sldr-hd"><span class="sldr-nm">Độ nhạy Head Lock</span><span class="sldr-vl" id="headVal">65</span></div>
+          <input type="range" class="slider" min="0" max="100" value="65" oninput="updateSlider(this,'headVal')">
+        </div>
+        <div class="set-row col">
+          <div class="set-desc">Phạm vi khóa đầu</div>
+          <div class="btn-grp">
+            <button class="bopt" onclick="selOpt(this,'headrange')">Hẹp</button>
+            <button class="bopt active" onclick="selOpt(this,'headrange')">Trung bình</button>
+            <button class="bopt" onclick="selOpt(this,'headrange')">Rộng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scope Optimizer -->
+      <div class="card">
+        <div class="sec-hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <div><h3>Scope — <em>Scope Optimizer</em></h3></div>
+        </div>
+        <div class="set-row">
+          <div><div class="set-lbl">Scope Optimizer</div><div class="set-desc">Tối ưu độ nhạy khi dùng scope</div></div>
+          <button class="toggle" id="tgl-scope" onclick="featureToggle('scope',this)"></button>
+        </div>
+        <div class="sldr-row">
+          <div class="sldr-hd"><span class="sldr-nm">Scope Sensitivity</span><span class="sldr-vl" id="scopeVal">75</span></div>
+          <input type="range" class="slider" min="0" max="100" value="75" oninput="updateSlider(this,'scopeVal')">
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="page" id="page-admin">
+      <div id="admin-locked">
+        <div style="font-size:52px;margin-bottom:16px">🔒</div>
+        <div style="font-size:18px;font-weight:800">Chỉ dành cho Admin</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:8px">Đăng nhập bằng key Admin để truy cập</div>
+      </div>
+      <div id="admin-panel" style="display:none">
+        <div class="adm-hd">
+          <div class="adm-badge">⚙️</div>
+          <div><div class="adm-title">ADMIN PANEL</div><div class="adm-sub" id="adminInfo">—</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Tổng quan</div>
+          <div class="stats-grid" style="margin:0">
+            <div class="stat-card sm"><div class="stat-label">TỔNG KEY</div><div class="stat-value cyan sm" id="tkTotal">0</div></div>
+            <div class="stat-card sm"><div class="stat-label">VIP</div><div class="stat-value sm" style="color:var(--gold)" id="tkVip">0</div></div>
+            <div class="stat-card sm"><div class="stat-label">NORMAL</div><div class="stat-value green sm" id="tkNorm">0</div></div>
+            <div class="stat-card sm"><div class="stat-label">ADMIN</div><div class="stat-value sm" style="color:var(--red)" id="tkAdm">0</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Tạo Key Mới</div>
+          <div class="form-row">
+            <input class="form-inp" id="newKeyInput" placeholder="Key code (hoặc tự tạo)" style="font-family:monospace;font-size:12px">
+            <button class="btn-gen" onclick="generateKey()">🎲 Auto</button>
+          </div>
+          <div class="form-row">
+            <select class="form-sel" id="newKeyType">
+              <option value="normal">Normal (7 ngày)</option>
+              <option value="vip">VIP (30 ngày)</option>
+              <option value="admin">Admin (Lifetime)</option>
+            </select>
+            <input class="form-inp" id="newKeyDays" type="number" placeholder="Số ngày" min="1" style="max-width:110px">
+          </div>
+          <button class="btn-create" onclick="createKey()">+ TẠO KEY</button>
+          <div id="createMsg" style="margin-top:10px;font-size:13px;display:none"></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="justify-content:space-between"><span>Danh sách Key</span><span id="keyCount" style="color:var(--text2);font-size:11px;font-weight:500"></span></div>
+          <div style="overflow-x:auto">
+            <table class="key-tbl">
+              <thead><tr><th>KEY</th><th>LOẠI</th><th>HẾT HẠN</th><th></th></tr></thead>
+              <tbody id="keyTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="card">
+        <div class="card-title">Tài khoản</div>
+        <div class="si"><div><div class="sl2">Loại Key</div><div class="sd2">Gói đang sử dụng</div></div><div class="sv2 cyan" id="stKeyType">—</div></div>
+        <div class="si"><div><div class="sl2">Hết hạn</div><div class="sd2">Thời gian còn lại</div></div><div class="sv2" id="stExpiry">—</div></div>
+        <div class="si"><div><div class="sl2">Key Code</div></div><div class="sv2" id="stKey" style="font-family:monospace;font-size:10px;color:var(--text2)">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Thiết bị</div>
+        <div class="si"><div><div class="sl2">Loại thiết bị</div></div><div class="sv2" id="stDevice">—</div></div>
+        <div class="si"><div><div class="sl2">CPU Cores</div></div><div class="sv2" id="stCores">—</div></div>
+        <div class="si"><div><div class="sl2">RAM</div></div><div class="sv2" id="stRam">—</div></div>
+        <div class="si"><div><div class="sl2">Kết nối</div></div><div class="sv2" id="stNet">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Ứng dụng</div>
+        <div class="si"><div><div class="sl2">Phiên bản</div></div><div class="sv2">v2.8.1</div></div>
+        <div class="si"><div><div class="sl2">Tối ưu tự động</div><div class="sd2">Chạy khi khởi động</div></div><button class="toggle on" id="tgl-auto" onclick="this.classList.toggle('on')"></button></div>
+        <div class="si"><div><div class="sl2">Thông báo</div></div><button class="toggle on" id="tgl-notif" onclick="this.classList.toggle('on')"></button></div>
+      </div>
+      <div class="card">
+        <button class="btn-logout" onclick="logout()">🚪 Đăng xuất / Đổi Key</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- BOTTOM NAV -->
+  <nav id="bottom-nav">
+    <button class="nav-item active" onclick="goPage('home',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
+    </button>
+    <button class="nav-item" onclick="goPage('features',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Features
+    </button>
+    <button class="nav-item" onclick="goPage('stats',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Stats
+    </button>
+    <button class="nav-item" onclick="goPage('vip',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>VIP
+    </button>
+    <button class="nav-item" onclick="goPage('aimlab',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>AIM LAB
+    </button>
+    <button class="nav-item" onclick="goPage('admin',this)" id="adminNavBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Admin
+    </button>
+    <button class="nav-item" onclick="goPage('settings',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M22 12h-2M4 12H2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 22v-2M12 4V2"/></svg>Settings
+    </button>
+  </nav>
+</div>
+
+<script src="js/device.js"></script>
+<script src="js/keys.js"></script>
+<script src="js/features.js"></script>
+<script src="js/stats.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
