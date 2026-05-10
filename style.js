@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>SPERNEW - Game Optimizer</title>
-<style>
-  :root {
+:root {
     --bg: #07090f;
     --bg2: #0d1117;
     --card: #111827;
